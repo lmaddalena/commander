@@ -12,9 +12,15 @@ typedef struct option {
 	char *paramspec;		// parameter specification
 } t_option;
 
+// param type
+typedef struct param {
+	char *name;				// param name
+	char *value;			// param value
+} t_param;
 
 // commander type
 typedef struct commander {
+	int paramc;
 	int optc;
 	t_option *options[];
 } t_commander;
@@ -42,8 +48,9 @@ int main(int argc, char *argv[])
 	cmd->options[3] = makeoption("b", "bar", "the bar parameter", 1, "0|1");
 	cmd->options[4] = makeoption("z", "baz", "the baz parameter", 1, "name");
 
+
 	int p = parseargs(cmd, argc, argv);
-	if(p == 0)
+	if(p == 0 || strcmp(getoptionbysname("h", cmd)->value, "1") == 0)
 	{
 		showusage(argv[0], cmd);
 		return 0;

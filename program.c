@@ -4,12 +4,11 @@
 
 // option type
 typedef struct option {
-	char *sform;			// short form
-	char *lform;			// long form
+	char *sname;			// short name
+	char *lname;			// long name
 	char *value;			// option value
 	char *description;		// option's description showed in help
 	int  mandatory;			// is mandatory? (0|1)
-	int  musthavevalue;		// must have a value? (0|1)
 	char *paramspec;		// parameter specification
 } t_option;
 
@@ -21,33 +20,53 @@ typedef struct commander {
 } t_commander;
 
 // functions prototypes
-t_option *makeoption(char *sform, char *lform, char *description, int mandatory, int musthavevalue, char *paramspec);
+t_option *makeoption(char *sname, char *lname, char *description, int mandatory, char *paramspec);
 t_commander *makecommander(int optc);
 void printoptions(t_option *opt);
-void showhelp(char *program_name, t_commander *cmd);
+void showusage(char *program_name, t_commander *cmd);
 int parseargs(t_commander *cmd, int argc, char *argv[]);
-t_option *getoptionbysform(char *sform, t_commander *cmd);
-t_option *getoptionbylform(char *lform, t_commander *cmd);
+t_option *getoptionbysname(char *sname, t_commander *cmd);
+t_option *getoptionbylname(char *lname, t_commander *cmd);
+void showreport(t_commander *cmd);
 
 //
 // main
 int main(int argc, char *argv[])
 {
-	printf("Commander is an command line parsing module writed by L.Maddalena\n");
+	printf("Commander is an command line parsing module writed by L. Maddalena\n");
 
 	t_commander *cmd = makecommander(5);
-	cmd->options[0] = makeoption("h", "help", "output usage information", 0, 0, NULL);
-	cmd->options[1] = makeoption("f", "foo", "the foo parameter", 0, 1, "value");
-	cmd->options[2] = makeoption("g", "gas", "the gas parameter", 0, 0, NULL);
-	cmd->options[3] = makeoption("b", "bar", "the bar parameter", 1, 1, "0|1");
-	cmd->options[4] = makeoption("z", "baz", "the baz parameter", 1, 0, "name");
+	cmd->options[0] = makeoption("h", "help", "output usage information", 0, NULL);
+	cmd->options[1] = makeoption("f", "foo", "the foo parameter", 0, "value");
+	cmd->options[2] = makeoption("g", "gas", "the gas parameter", 0, NULL);
+	cmd->options[3] = makeoption("b", "bar", "the bar parameter", 1, "0|1");
+	cmd->options[4] = makeoption("z", "baz", "the baz parameter", 1, "name");
 
 	int p = parseargs(cmd, argc, argv);
 	if(p == 0)
 	{
-		showhelp(argv[0], cmd);
+		showusage(argv[0], cmd);
 		return 0;
 	}
+	
+	showreport(cmd);
+}
+
+//
+// showreport
+void showreport(t_commander *cmd)
+{
+		printf("\n");
+		printf("Commander report:\n");
+		printf("=================\n\n");
+		
+		int i ;
+		for(i = 0; i < cmd->optc; i++)
+		{
+			t_option *opt = cmd->options[i];			
+			printf("opt -%s --%s paramspec: '%s' mandatory: %i value: %s\n", opt->sname, opt->lname, opt->paramspec, opt->mandatory, opt->value );
+		}	
+	
 }
 
 //
@@ -57,7 +76,6 @@ int parseargs(t_commander *cmd, int argc, char *argv[])
 	int i;
 
 	t_option *opt = NULL;
-
 	
 	for(i = 1; i < argc; i++)
 	{		
@@ -67,7 +85,7 @@ int parseargs(t_commander *cmd, int argc, char *argv[])
 		// number of dash 
 		int dash = 0;
 
-		// count the dash and set the pointer to the first char after the dashes
+		// count the dashes and set the pointer to the first char after they
 		while(*c != '\0')
 		{
 			if(*c == '-')
@@ -79,55 +97,62 @@ int parseargs(t_commander *cmd, int argc, char *argv[])
 		
 	
 		// parse...
-		if(dash == 0 && opt != NULL)			// option value
-		{
-			opt->value = malloc(strlen(c) + 1);
-			strcpy(opt->value, c);
-			printf("value = %s\n", opt->value);
-		}
-		else if(dash == 1)						// short form
-			opt = getoptionbysform(c, cmd);
-		else if(dash == 2)						// long form
-			opt = getoptionbylform(c, cmd);
-		else									// too many dashes
+		if(dash == 0 && opt != NULL && opt->paramspec != NULL)			// option value
+			opt->value = c;
+		else if(dash == 1)												// short form
+			opt = getoptionbysname(c, cmd);
+		else if(dash == 2)												// long form
+			opt = getoptionbylname(c, cmd);
+		else															// too many dashes
 			return 0;
 			
 		// printf("%i*%s:%i",dash,c,strlen(c));
 							
 		if(opt == NULL)							// option not found
-			return 0;					
+			return 0;	
+		else
+			if(opt->paramspec == NULL)			// option doesn't have a value. Set 1 (true)
+				opt->value = "1";						
 	}
 
+	// check mandatory options
+	for(i = 0; i < cmd->optc; i++)
+	{
+		opt = cmd->options[i];
+		if(opt->mandatory == 1 && opt->value == NULL)
+			return 0;			
+	}
+	
 	return 1;									// all argument parsed. return ok.
 }
 
 //
-// getoptionbysform
-t_option *getoptionbysform(char *sform, t_commander *cmd)
+// getoptionbysname
+t_option *getoptionbysname(char *sname, t_commander *cmd)
 {
 	int i;
 	for(i = 0; i < 	cmd->optc; i++)
-		if(strcmp(cmd->options[i]->sform, sform) == 0)
+		if(strcmp(cmd->options[i]->sname, sname) == 0)
 			return 	cmd->options[i];
 
 	return NULL;	
 }
 
 //
-// getoptionbylform
-t_option *getoptionbylform(char *lform, t_commander *cmd)
+// getoptionbylname
+t_option *getoptionbylname(char *lname, t_commander *cmd)
 {
 	int i;
 	for(i = 0; i < 	cmd->optc; i++)
-		if(strcmp(cmd->options[i]->lform, lform) == 0)
+		if(strcmp(cmd->options[i]->lname, lname) == 0)
 			return 	cmd->options[i];
 
 	return NULL;	
 }
 
 //
-// showhelp
-void showhelp(char *program_name, t_commander *cmd)
+// showusage
+void showusage(char *program_name, t_commander *cmd)
 {
 	printf("\n");
 	printf("Usage: %s [options]\n", program_name);
@@ -151,16 +176,20 @@ t_commander *makecommander(int optc)
 
 //
 // makeoption
-t_option *makeoption(char *sform, char *lform, char *description, int mandatory, int musthavevalue, char *paramspec)
+t_option *makeoption(char *sname, char *lname, char *description, int mandatory, char *paramspec)
 {
 	t_option *opt = malloc(sizeof(t_option));
 
-	opt->sform = sform;
-	opt->lform = lform;
+	opt->sname = sname;
+	opt->lname = lname;
 	opt->description = description,
 	opt->mandatory = mandatory;
-	opt->musthavevalue = musthavevalue;
 	opt->paramspec = paramspec;
+	
+	if(paramspec == NULL)
+		opt->value = "0";		// option doesen't have a value: set to false
+	else
+		opt->value = NULL;		// option must have a value: set to NULL (it will be get from command line args)
 
 	return opt;
 }
@@ -173,15 +202,15 @@ void printoptions(t_option *opt)
 	char *paramspec = NULL;
 	
 	if(opt->paramspec != NULL) 
-		paramspec = malloc(strlen(opt->sform) + strlen(opt->lform) + strlen(opt->paramspec) + 10);		
+		paramspec = malloc(strlen(opt->sname) + strlen(opt->lname) + strlen(opt->paramspec) + 10);		
 	else 
-		paramspec = malloc(strlen(opt->sform) + strlen(opt->lform) + 10);		
+		paramspec = malloc(strlen(opt->sname) + strlen(opt->lname) + 10);		
 	
 	strcpy(paramspec, "");
 	strcat(paramspec, "-");
-	strcat(paramspec, opt->sform);
+	strcat(paramspec, opt->sname);
 	strcat(paramspec, ", --");
-	strcat(paramspec, opt->lform);
+	strcat(paramspec, opt->lname);
 
 	if(opt->paramspec != NULL)
 	{

@@ -1,11 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <signal.h>
 #include "commander.h"
 
 void fibo(int, int);
-
-void showreport(t_commander *cmd);
 
 //
 // main
@@ -64,3 +63,4 @@ void fibo(int max, int vert)
 	}
 	
 }
+

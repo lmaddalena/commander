@@ -1,4 +1,4 @@
-ifndef COMMANDER_H
+#ifndef COMMANDER_H
 #define COMMANDER_H
 
 // option type

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <signal.h>
+#include <string.h>
 #include "commander.h"
 
 void fibo(int, int);
@@ -61,6 +61,6 @@ void fibo(int max, int vert)
 			printf("\n");
 
 	}
-	
+	printf("\n");
 }
 

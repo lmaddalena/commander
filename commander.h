@@ -1,4 +1,4 @@
-#ifndef COMMANDER_H
+ifndef COMMANDER_H
 #define COMMANDER_H
 
 // option type
@@ -16,13 +16,13 @@ typedef struct option {
 typedef struct param {
 	char *name;				// param name
 	char *value;			// param value
-	struct param *next;		// next param	
+	struct param *next;		// next param
 } t_param;
 
 // commander type
 typedef struct commander {
 	t_param *params;
-	t_option *options;	
+	t_option *options;
 } t_commander;
 
 // functions prototypes

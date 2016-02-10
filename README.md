@@ -6,7 +6,7 @@ by l.m.
 
 Example:
 --------
-'''''
+```
 testcommander.exe -h
 
 Usage: testcommander.exe source destination [options]
@@ -19,4 +19,4 @@ Options:
         -z, --baz <name>                        the baz parameter
         -h, --help                              output usage information
 
-''''
+```

@@ -4,6 +4,8 @@ Parse command line arguments
 
 by l.m.
 
+#Example:
+
 testcommander.exe -h
 
 Usage: testcommander.exe source destination [options]

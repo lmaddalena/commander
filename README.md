@@ -1,10 +1,10 @@
-## ANSI C Commander
+##ANSI C Commander
 
 Parse command line arguments
 
 by l.m.
 
-#Example:
+###Example:
 
 testcommander.exe -h
 

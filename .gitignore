@@ -2,3 +2,5 @@
 *.obj
 *.exe
 *.out
+*.ilk
+*.pdb

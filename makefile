@@ -1,6 +1,7 @@
 CC = gcc
 
 CFLAGS = -std=c99 -g
+LDFLAGS =
 ODIR = bin
 PROG = a.out
 

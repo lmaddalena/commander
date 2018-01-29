@@ -1,27 +1,28 @@
 CC = gcc
+CFLAGS = -std=c99 -g -Wall
+LDFLAGS =  
 
-CFLAGS = -std=c99 -g
-LDFLAGS =
-ODIR = bin
-PROG = a.out
 
-all: fibo test
+all: build/test.out build/fibonacci.out
 
-fibo: fibonacci.o commander.o
-	$(CC) $(LDFLAGS) $(ODIR)/fibonacci.o $(ODIR)/commander.o -o $(ODIR)/fibo.out
+build/test.out: bin/test.o build/commander.a
+	$(CC) $(LDFLAGS) $^ -o $@
 
-test : test.o commander.o
-	$(CC) $(LDFLAGS) $(ODIR)/test.o $(ODIR)/commander.o -o $(ODIR)/test.out
+build/fibonacci.out: bin/fibonacci.o build/commander.a
+	$(CC) $(LDFLAGS) $^ -o $@
 
-fibonacci.o : commander.h fibonacci.c
-	$(CC) $(CFLAGS) -c fibonacci.c -o $(ODIR)/fibonacci.o
+bin/test.o: src/test.c src/commander.h
+	$(CC) $(CFLAGS) -c $< -o $@
 
-test.o : commander.h test.c
-	$(CC) $(CFLAGS) -c test.c -o $(ODIR)/test.o
+bin/fibonacci.o: src/fibonacci.c src/commander.h
+	$(CC) $(CFLAGS) -c $< -o $@
 
-commander.o : commander.c commander.h
-	$(CC) $(CFLAGS) -c commander.c -o $(ODIR)/commander.o
+build/commander.a: bin/commander.o
+	ar rcs $@ $<
+	ranlib $@
 
+bin/commander.o: src/commander.c src/commander.h
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(ODIR)/test.out $(ODIR)/fibo.out $(ODIR)/*.o
+	rm -f build/* bin/*

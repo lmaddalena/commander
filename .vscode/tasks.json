@@ -4,9 +4,13 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "BuildAll",
+            "label": "Build",
             "type": "shell",
-            "command": "make all"
+            "command": "make",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }
